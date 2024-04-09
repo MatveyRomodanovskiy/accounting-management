@@ -1,6 +1,7 @@
 package telran.accounting.service;
 
 import telran.accounting.dto.AccountDto;
+import telran.accounting.dto.PasswordUpdateDataDto;
 
 public interface AccountService {
 	AccountDto addAccount(AccountDto accountDto);

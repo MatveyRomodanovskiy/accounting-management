@@ -1,11 +1,10 @@
 package telran.accounting.controller;
+import java.security.Principal;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,8 +13,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import telran.accounting.dto.AccountDto;
+import telran.accounting.dto.PasswordUpdateDataDto;
 import telran.accounting.service.AccountService;
-import telran.exceptions.NotFoundException;
+
 
 
 
@@ -33,11 +33,23 @@ public class AccountingController {
 	}
 
 	@DeleteMapping("{mail}")
-	AccountDto deleteAccount (@PathVariable String mail) {
+	AccountDto deleteAccount (@PathVariable String mail, Principal principal) {
+		if(!principal.getName().equalsIgnoreCase(mail)) {
+			throw new IllegalArgumentException("Only current authenticated user can delete own account");
+		}
 		return accountService.removeAccount(mail);	
 	}
 	
-
+	@PutMapping("/update")
+	void updatePassword(@RequestBody @Valid PasswordUpdateDataDto updateDataDto, Principal principal) {
+		log.debug("enter to the update");
+		if(!principal.getName().equalsIgnoreCase(updateDataDto.email())) {
+			log.debug("Names principal and emails {} {}",principal.getName(), updateDataDto.email());
+			throw new IllegalArgumentException("Only current authenticated user can update own account");
+		}
+		log.debug("Names principal and emails {} {}",updateDataDto.email());
+		accountService.updatePassword(updateDataDto.email(), updateDataDto.password());
+	}
 	
 	
 }
